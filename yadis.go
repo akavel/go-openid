@@ -5,13 +5,13 @@
 package openid
 
 import (
+	"bytes"
 	"errors"
-	"net/http"
-	"net/url"
 	"io"
 	"io/ioutil"
-	"bytes"
 	"log"
+	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -108,18 +108,10 @@ func YadisRequest(url_ string, method string) (resp *http.Response, err error) {
 	return nil, errors.New("Too many redirections")
 }
 
-var metaRE *regexp.Regexp
-var xrdsRE *regexp.Regexp
-
-func init() {
-	// These are ridiculous case insensitive pattern constructions.
-
-	// <[ \t]*meta[^>]*http-equiv=["']x-xrds-location["'][^>]*>
-	metaRE = regexp.MustCompile("<[ \t]*[mM][eE][tT][aA][^>]*[hH][tT][tT][pP]-[eE][qQ][uU][iI][vV]=[\"'][xX]-[xX][rR][dD][sS]-[lL][oO][cC][aA][tT][iI][oO][nN][\"'][^>]*>")
-
-	// content=["']([^"']+)["']
-	xrdsRE = regexp.MustCompile("[cC][oO][nN][tT][eE][nN][tT]=[\"']([^\"]+)[\"']")
-}
+var (
+	metaRE = regexp.MustCompile("(?i)<[ \t]*meta[^>]*http-equiv=[\"']x-xrds-location[\"'][^>]*>")
+	xrdsRE = regexp.MustCompile("(?i)content=[\"']([^\"']+)[\"']")
+)
 
 func searchHTMLMetaXRDS(r io.Reader) (string, error) {
 	data, err := ioutil.ReadAll(r)

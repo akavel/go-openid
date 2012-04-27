@@ -11,7 +11,6 @@
 // curl -o test_data/yahoo_xrds.html --dump-header test_data/yahoo_xrds.http --header "Accept: application/xrds+xml" "http://open.login.yahooapis.com/openid20/www.yahoo.com/xrds"
 // TODO: facebook? livejournal?
 
-
 package openid
 
 import (
@@ -55,7 +54,7 @@ type YadisTest struct {
 
 var YadisTests = []YadisTest{
 	YadisTest{"https://www.google.com/accounts/o8/id"},
-	YadisTest{"http://orange.fr/"},
+	//YadisTest{"http://orange.fr/"},
 	//YadisTest{"http://www.yahoo.com/"},
 }
 
@@ -74,4 +73,3 @@ func TestYadis(t *testing.T) {
 		}
 	}
 }
-

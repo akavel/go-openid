@@ -6,9 +6,9 @@ package openid
 
 import (
 	"errors"
-	"strings"
 	"io"
 	"net/url"
+	"strings"
 )
 
 const (
@@ -49,7 +49,6 @@ func GetRedirectURL(Identifier string, realm string, returnto string) (string, e
 	}
 
 	// If the Yadis protocol fails and no valid XRDS document is retrieved, or no Service Elements are found in the XRDS document, the URL is retrieved and HTML-Based discovery SHALL be attempted.
-
 
 	return "Not implemented", nil
 }
@@ -107,8 +106,8 @@ func CreateAuthenticationRequest(OPEndPoint, ClaimedID, Realm, ReturnTo string) 
 	var params []string
 
 	for k, v := range p {
-		params = append(params, url.QueryEscape(k) + "=" + url.QueryEscape(v))
-		
+		params = append(params, url.QueryEscape(k)+"="+url.QueryEscape(v))
+
 	}
 
 	return url_ + strings.Join(params, "&")

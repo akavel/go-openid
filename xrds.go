@@ -29,7 +29,7 @@ type XRDS struct {
 // Return the OP EndPoint and, if found, the Claimed Identifier
 func ParseXRDS(r io.Reader) (string, string) {
 	XRDS := new(XRDS)
-	err := xml.Unmarshal(r, XRDS)
+	err := xml.NewDecoder(r).Decode(XRDS)
 	if err != nil {
 		//fmt.Printf(err.String())
 		return "", ""
@@ -50,7 +50,6 @@ func ParseXRDS(r io.Reader) (string, string) {
 	}
 	return "", ""
 }
-
 
 func StringTableContains(t []string, s string) bool {
 	for _, v := range t {

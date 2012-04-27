@@ -5,8 +5,8 @@
 package openid
 
 import (
-	"testing"
 	"bytes"
+	"testing"
 )
 
 // ParseXRDS Test

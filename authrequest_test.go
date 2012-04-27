@@ -5,8 +5,8 @@
 package openid
 
 import (
-	"testing"
 	"bytes"
+	"testing"
 )
 
 // NormalizeIdentifier Test
@@ -40,7 +40,7 @@ func TestNormalizeIdentifier(testing *testing.T) {
 
 var Identifiers = []string{
 	"https://www.google.com/accounts/o8/id",
-	"orange.fr",
+	//"orange.fr",
 	//"yahoo.com",
 }
 
