@@ -20,7 +20,7 @@ type XRD struct {
 	XMLName xml.Name "XRD"
 	Service XRDSIdentifier
 }
-type XRDS struct {
+type xrds struct {
 	XMLName xml.Name "XRDS"
 	XRD     XRD
 }
@@ -28,13 +28,13 @@ type XRDS struct {
 // Parse a XRDS document provided through a io.Reader
 // Return the OP EndPoint and, if found, the Claimed Identifier
 func ParseXRDS(r io.Reader) (string, string) {
-	XRDS := new(XRDS)
-	err := xml.NewDecoder(r).Decode(XRDS)
+	xrds := new(xrds)
+	err := xml.NewDecoder(r).Decode(xrds)
 	if err != nil {
 		//fmt.Printf(err.String())
 		return "", ""
 	}
-	XRDSI := XRDS.XRD.Service
+	XRDSI := xrds.XRD.Service
 
 	XRDSI.URI = strings.TrimSpace(XRDSI.URI)
 	XRDSI.LocalID = strings.TrimSpace(XRDSI.LocalID)
