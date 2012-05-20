@@ -28,8 +28,8 @@ type xrds struct {
 // Parse a XRDS document provided through a io.Reader
 // Return the OP EndPoint and, if found, the Claimed Identifier
 func ParseXRDS(r io.Reader) (string, string) {
-	xrds := new(xrds)
-	err := xml.NewDecoder(r).Decode(xrds)
+	xrds := xrds{}
+	err := xml.NewDecoder(r).Decode(&xrds)
 	if err != nil {
 		//fmt.Printf(err.String())
 		return "", ""
