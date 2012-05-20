@@ -13,18 +13,15 @@ import (
 	"regexp"
 )
 
-// Verify that the url given match a successfull authentication
+// Verify that the url given match a successfull authentication.
+//
 // Return:
-// * true if authenticated, false otherwise
-// * The Claimed identifier if authenticated
-// * Eventually an error
-func Verify(url_ string) (grant bool, identifier string, err error) {
-	grant = false
-	identifier = ""
-	err = nil
+// 	* true if authenticated, false otherwise
+// 	* the claimed identifier if authenticated
+// 	* eventually an error
+func Verify(url_ string) (granted bool, identifier string, err error) {
 
-	var values url.Values
-	values, err = url.ParseQuery(url_)
+	values, err := url.ParseQuery(url_)
 	if err != nil {
 		return false, "", err
 	}
@@ -34,9 +31,11 @@ func Verify(url_ string) (grant bool, identifier string, err error) {
 
 	// Discovered information matches the information in the assertion (Section 11.2)
 
-	// An assertion has not yet been accepted from this OP with the same value for "openid.response_nonce" (Section 11.3)
+	// An assertion has not yet been accepted from this OP with the same value for
+	// "openid.response_nonce" (Section 11.3)
 
-	// The signature on the assertion is valid and all fields that are required to be signed are signed (Section 11.4)
+	// The signature on the assertion is valid and all fields that are required to be signed
+	// are signed (Section 11.4)
 
 	return VerifyValues(values)
 }
@@ -45,7 +44,7 @@ var reVerifyDirectIsValid = "is_valid:true"
 var reVerifyDirectNs = regexp.MustCompile("ns:([a-zA-Z0-9:/.]*)")
 
 // Like Verify on a parsed URL
-func VerifyValues(values url.Values) (grant bool, identifier string, err error) {
+func VerifyValues(values url.Values) (granted bool, identifier string, err error) {
 
 	// Create the url
 	urlEndPoint := values.Get("openid.op_endpoint")
