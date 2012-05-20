@@ -20,7 +20,7 @@ func Yadis(id string) (io.Reader, error) {
 }
 
 func YadisVerbose(id string, verbose *log.Logger) (io.Reader, error) {
-	for i:=0; i<5; i++ {
+	for i := 0; i < 5; i++ {
 		r, err := YadisRequest(id)
 		if err != nil || r == nil {
 			return nil, err
@@ -31,9 +31,9 @@ func YadisVerbose(id string, verbose *log.Logger) (io.Reader, error) {
 			return body, err
 		}
 		if body != nil {
-            if verbose != nil {
-                verbose.Printf(`got xrds from "%s"`, id)
-            }
+			if verbose != nil {
+				verbose.Printf(`got xrds from "%s"`, id)
+			}
 			return body, nil
 		}
 		if redirect == "" {
@@ -41,7 +41,7 @@ func YadisVerbose(id string, verbose *log.Logger) (io.Reader, error) {
 		}
 		id = redirect
 	}
-    return nil, errors.New("Too many Yadis redirects")
+	return nil, errors.New("Too many Yadis redirects")
 }
 
 func YadisProcess(r *http.Response, verbose *log.Logger) (body io.Reader, redirect string, err error) {
