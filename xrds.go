@@ -34,19 +34,19 @@ func ParseXRDS(r io.Reader) (string, string) {
 		//fmt.Printf(err.String())
 		return "", ""
 	}
-	XRDSI := xrds.XRD.Service
+	xrdsi := xrds.XRD.Service
 
-	XRDSI.URI = strings.TrimSpace(XRDSI.URI)
-	XRDSI.LocalID = strings.TrimSpace(XRDSI.LocalID)
+	xrdsi.URI = strings.TrimSpace(xrdsi.URI)
+	xrdsi.LocalID = strings.TrimSpace(xrdsi.LocalID)
 
-	//fmt.Printf("%v\n", XRDSI)
+	//fmt.Printf("%v\n", xrdsi)
 
-	if stringTableContains(XRDSI.Type, "http://specs.openid.net/auth/2.0/server") {
+	if stringTableContains(xrdsi.Type, "http://specs.openid.net/auth/2.0/server") {
 		//fmt.Printf("OP Identifier Element found\n")
-		return XRDSI.URI, ""
-	} else if stringTableContains(XRDSI.Type, "http://specs.openid.net/auth/2.0/signon") {
+		return xrdsi.URI, ""
+	} else if stringTableContains(xrdsi.Type, "http://specs.openid.net/auth/2.0/signon") {
 		//fmt.Printf("Claimed Identifier Element found\n")
-		return XRDSI.URI, XRDSI.LocalID
+		return xrdsi.URI, xrdsi.LocalID
 	}
 	return "", ""
 }
