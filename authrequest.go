@@ -25,6 +25,12 @@ authenticated, id contains its identifier.
 */
 package openid
 
+/*
+{ClaimedID?}.Discover()
+{ClaimedID, OPEndpoindURL}.BuildRedirect(realm, returnto)
+id, err := {ClaimedID, OPEndpointURL}.Verify(receivedURLValues)
+*/
+
 import (
 	"errors"
 	"net/url"
@@ -115,24 +121,19 @@ func normalizeIdentifier(id string) (identifier string, identifierType int) {
 }
 
 func CreateAuthenticationRequest(OPEndPoint, ClaimedID, Realm, ReturnTo string) string {
-	var p = make(map[string]string)
-
-	p["openid.ns"] = "http://specs.openid.net/auth/2.0"
-	p["openid.mode"] = "checkid_setup"
-
-	if len(ClaimedID) == 0 {
-		p["openid.claimed_id"] = "http://specs.openid.net/auth/2.0/identifier_select"
-		p["openid.identity"] = "http://specs.openid.net/auth/2.0/identifier_select"
-	} else {
-		p["openid.claimed_id"] = ClaimedID
-		p["openid.identity"] = ClaimedID
+	if ClaimedID == "" {
+		ClaimedID = "http://specs.openid.net/auth/2.0/identifier_select"
+	}
+	p := map[string]string{
+		"openid.ns":         "http://specs.openid.net/auth/2.0",
+		"openid.mode":       "checkid_setup",
+		"openid.return_to":  Realm + ReturnTo,
+		"openid.realm":      Realm,
+		"openid.claimed_id": ClaimedID,
+		"openid.identity":   ClaimedID,
 	}
 
-	p["openid.return_to"] = Realm + ReturnTo
-	p["openid.realm"] = Realm
-
 	var url_ string
-
 	if strings.Index(OPEndPoint, "?") == -1 {
 		url_ = OPEndPoint + "?"
 	} else {
@@ -140,10 +141,8 @@ func CreateAuthenticationRequest(OPEndPoint, ClaimedID, Realm, ReturnTo string) 
 	}
 
 	var params []string
-
 	for k, v := range p {
 		params = append(params, url.QueryEscape(k)+"="+url.QueryEscape(v))
-
 	}
 
 	return url_ + strings.Join(params, "&")
