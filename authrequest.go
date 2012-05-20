@@ -23,7 +23,6 @@ package openid
 
 import (
 	"errors"
-	"io"
 	"net/url"
 	"strings"
 )
@@ -34,8 +33,7 @@ const (
 )
 
 func GetRedirectURL(identifier string, realm string, returnto string) (string, error) {
-	var err error
-	var id, idType = normalizeIdentifier(identifier)
+	id, idType := normalizeIdentifier(identifier)
 
 	// If the identifier is an XRI, [XRI_Resolution_2.0] will yield an XRDS document
 	// that contains the necessary information. It should also be noted that Relying
@@ -50,8 +48,7 @@ func GetRedirectURL(identifier string, realm string, returnto string) (string, e
 	// If it is a URL, the Yadis protocol [Yadis] SHALL be first attempted. If it succeeds,
 	// the result is again an XRDS document.
 	if idType == identifierURL {
-		var reader io.Reader
-		reader, err = Yadis(id)
+		reader, err := Yadis(id)
 		if err != nil {
 			return "", err
 		}
@@ -59,9 +56,9 @@ func GetRedirectURL(identifier string, realm string, returnto string) (string, e
 			return "", errors.New("Yadis returned an empty Reader for the ID: " + id)
 		}
 
-		var endpoint, claimedid = ParseXRDS(reader)
+		endpoint, claimedid, err := ParseXRDS(reader)
 		if len(endpoint) == 0 {
-			return "", errors.New("Unable to parse the XRDS document")
+			return "", errors.New("Unable to parse the XRDS document: " + err.Error())
 		}
 
 		// At this point we have the endpoint and eventually a claimed id

@@ -6,6 +6,7 @@ package openid
 
 import (
 	"encoding/xml"
+	"errors"
 	"io"
 	"strings"
 )
@@ -27,15 +28,14 @@ type xrds struct {
 
 // Parse a XRDS document provided through a io.Reader
 // Return the OP EndPoint and, if found, the Claimed Identifier
-func ParseXRDS(r io.Reader) (string, string) {
+func ParseXRDS(r io.Reader) (string, string, error) {
 	xrds := xrds{}
 	err := xml.NewDecoder(r).Decode(&xrds)
 	if err != nil {
-		//fmt.Printf(err.String())
-		return "", ""
+		return "", "", err
 	}
-	xrdsi := xrds.XRD.Service
 
+	xrdsi := xrds.XRD.Service
 	xrdsi.URI = strings.TrimSpace(xrdsi.URI)
 	xrdsi.LocalID = strings.TrimSpace(xrdsi.LocalID)
 
@@ -43,12 +43,12 @@ func ParseXRDS(r io.Reader) (string, string) {
 
 	if stringTableContains(xrdsi.Type, "http://specs.openid.net/auth/2.0/server") {
 		//fmt.Printf("OP Identifier Element found\n")
-		return xrdsi.URI, ""
+		return xrdsi.URI, "", nil
 	} else if stringTableContains(xrdsi.Type, "http://specs.openid.net/auth/2.0/signon") {
 		//fmt.Printf("Claimed Identifier Element found\n")
-		return xrdsi.URI, xrdsi.LocalID
+		return xrdsi.URI, xrdsi.LocalID, nil
 	}
-	return "", ""
+	return "", "", errors.New("No supported Identifier Elements in Service Types list")
 }
 
 func stringTableContains(t []string, s string) bool {
