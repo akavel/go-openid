@@ -29,11 +29,11 @@ type xrds struct {
 
 // Parse a XRDS document provided through a io.Reader
 // Return the OP EndPoint and, if found, the Claimed Identifier
-func ParseXRDS(r io.Reader) (OPEndpointURL string, OPLocalIdentifier string, err error) {
+func (q *Query) parseXRDS(r io.Reader) (err error) {
 	xrds := xrds{}
 	err = xml.NewDecoder(r).Decode(&xrds)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 
 	xrdsi := xrds.XRD.Service
@@ -44,14 +44,19 @@ func ParseXRDS(r io.Reader) (OPEndpointURL string, OPLocalIdentifier string, err
 
 	if stringTableContains(xrdsi.Type, "http://specs.openid.net/auth/2.0/server") {
 		//fmt.Printf("OP Identifier Element found\n")
-		return xrdsi.URI, "", nil
+		q.OPEndpointURL = xrdsi.URI
+		return nil
 	} else if stringTableContains(xrdsi.Type, "http://specs.openid.net/auth/2.0/signon") {
 		//fmt.Printf("Claimed Identifier Element found\n")
-		return xrdsi.URI, xrdsi.LocalID, nil
+		q.OPEndpointURL = xrdsi.URI
+		q.ClaimedID = xrdsi.LocalID // XXX: is it ok for sure?
+		return nil
 	} else if stringTableContains(xrdsi.Type, "http://openid.net/signon/1.1") || stringTableContains(xrdsi.Type, "http://openid.net/signon/1.0") {
-		return xrdsi.URI, xrdsi.Delegate, nil
+		q.OPEndpointURL = xrdsi.URI
+		q.ClaimedID = xrdsi.Delegate
+		return nil
 	}
-	return "", "", errors.New("No supported Identifier Elements in Service Types list")
+	return errors.New("No supported Identifier Elements in Service Types list")
 }
 
 func stringTableContains(t []string, s string) bool {

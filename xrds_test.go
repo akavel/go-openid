@@ -47,9 +47,10 @@ var ParseXRDSTests = []ParseXRDSTest{
 
 func TestParseXRDS(t *testing.T) {
 	for _, xrds := range ParseXRDSTests {
-		opep, ci, err := ParseXRDS(bytes.NewBuffer([]byte(xrds.in)))
-		if opep != xrds.OPEndPoint || ci != xrds.ClaimedId || err != nil {
-			t.Errorf("ParseXRDS(%s) = (%s, %s, \"%s\") want (%s, %s, nil).", xrds.in, opep, ci, err.Error(), xrds.OPEndPoint, xrds.ClaimedId)
+		q := Query{}
+		err := q.parseXRDS(bytes.NewBuffer([]byte(xrds.in)))
+		if q.OPEndpointURL != xrds.OPEndPoint || q.ClaimedID != xrds.ClaimedId || err != nil {
+			t.Errorf(`ParseXRDS(%s) = (%s, %s, "%s") want (%s, %s, nil).`, xrds.in, q.OPEndpointURL, q.ClaimedID, err.Error(), xrds.OPEndPoint, xrds.ClaimedId)
 		}
 	}
 }

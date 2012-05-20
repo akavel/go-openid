@@ -16,6 +16,10 @@ import (
 )
 
 func Discover(identifier string) (*Query, error) {
+	return DiscoverVerbose(identifier, nil)
+}
+
+func DiscoverVerbose(identifier string, verbose *log.Logger) (*Query, error) {
 	id, idType := normalizeIdentifier(identifier)
 
 	// If the identifier is an XRI, [XRI_Resolution_2.0] will yield an XRDS document
@@ -31,7 +35,10 @@ func Discover(identifier string) (*Query, error) {
 	// If it is a URL, the Yadis protocol [Yadis] SHALL be first attempted. If it succeeds,
 	// the result is again an XRDS document.
 	if idType == identifierURL {
-		reader, err := yadisDial(id)
+		query := Query{
+			Logger: verbose,
+		}
+		reader, err := query.yadisGet(id)
 		if err != nil {
 			return nil, err
 		}
@@ -39,14 +46,11 @@ func Discover(identifier string) (*Query, error) {
 			return nil, errors.New("Yadis returned an empty Reader for the ID: " + id)
 		}
 
-		endpoint, claimedid, err := ParseXRDS(reader)
-		if len(endpoint) == 0 {
+		err = query.parseXRDS(reader)
+		if query.OPEndpointURL == "" {
 			return nil, errors.New("Unable to parse the XRDS document: " + err.Error())
 		}
-		return &Query{
-			ClaimedID:     claimedid,
-			OPEndpointURL: endpoint,
-		}, nil
+		return &query, nil
 	}
 
 	// If the Yadis protocol fails and no valid XRDS document is retrieved, or
@@ -54,28 +58,21 @@ func Discover(identifier string) (*Query, error) {
 	// and HTML-Based discovery SHALL be attempted.
 
 	return nil, errors.New("Non-Yadis identifiers not implemented yet")
-
 }
 
-func yadisDial(id string) (io.Reader, error) {
-	return yadisDialVerbose(id, nil)
-}
-
-func yadisDialVerbose(id string, verbose *log.Logger) (io.Reader, error) {
+func (q Query) yadisGet(id string) (io.Reader, error) {
 	for i := 0; i < 5; i++ {
 		r, err := YadisRequest(id)
 		if err != nil || r == nil {
 			return nil, err
 		}
 
-		body, redirect, err := YadisProcess(r, verbose)
+		body, redirect, err := q.yadisProcess(r)
 		if err != nil {
 			return body, err
 		}
 		if body != nil {
-			if verbose != nil {
-				verbose.Printf(`got xrds from "%s"`, id)
-			}
+			q.logf(`got xrds from "%s"`, id)
 			return body, nil
 		}
 		if redirect == "" {
@@ -86,7 +83,7 @@ func yadisDialVerbose(id string, verbose *log.Logger) (io.Reader, error) {
 	return nil, errors.New("Too many Yadis redirects")
 }
 
-func YadisProcess(r *http.Response, verbose *log.Logger) (body io.Reader, redirect string, err error) {
+func (q Query) yadisProcess(r *http.Response) (body io.Reader, redirect string, err error) {
 	contentType := r.Header.Get("Content-Type")
 
 	// If it is an XRDS document, return the Reader
@@ -100,24 +97,18 @@ func YadisProcess(r *http.Response, verbose *log.Logger) (body io.Reader, redire
 		if err != nil {
 			return nil, "", err
 		}
-		if verbose != nil {
-			verbose.Printf(`fetching xrds found in html "%s"`, url_)
-		}
+		q.logf(`fetching xrds found in html "%s"`, url_)
 		return nil, url_, nil
 	}
 
 	// If the response contain an X-XRDS-Location header
 	xrds_location := r.Header.Get("X-Xrds-Location")
 	if len(xrds_location) > 0 {
-		if verbose != nil {
-			verbose.Printf(`fetching xrds found in http header "%s"`, xrds_location)
-		}
+		q.logf(`fetching xrds found in http header "%s"`, xrds_location)
 		return nil, xrds_location, nil
 	}
 
-	if verbose != nil {
-		verbose.Printf("Yadis fails out, nothing found. status=%#v", r.StatusCode)
-	}
+	q.logf("Yadis fails out, nothing found. status=%#v", r.StatusCode)
 	// If nothing is found try to parse it as a XRDS doc
 	return nil, "", nil
 }

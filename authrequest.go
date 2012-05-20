@@ -32,6 +32,7 @@ id, err := {ClaimedID, OPEndpointURL}.Verify(receivedURLValues)
 */
 
 import (
+	"log"
 	"net/url"
 	"strings"
 )
@@ -39,6 +40,14 @@ import (
 type Query struct {
 	ClaimedID     string
 	OPEndpointURL string
+	*log.Logger
+}
+
+func (q Query) logf(format string, args ...interface{}) {
+	if q.Logger == nil {
+		return
+	}
+	q.Logger.Printf(format, args...)
 }
 
 const (
