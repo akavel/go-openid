@@ -41,8 +41,8 @@ func Verify(url_ string) (grant bool, identifier string, err error) {
 	return VerifyValues(values)
 }
 
-var REVerifyDirectIsValid = "is_valid:true"
-var REVerifyDirectNs = regexp.MustCompile("ns:([a-zA-Z0-9:/.]*)")
+var reVerifyDirectIsValid = "is_valid:true"
+var reVerifyDirectNs = regexp.MustCompile("ns:([a-zA-Z0-9:/.]*)")
 
 // Like Verify on a parsed URL
 func VerifyValues(values url.Values) (grant bool, identifier string, err error) {
@@ -83,7 +83,7 @@ func VerifyValues(values url.Values) (grant bool, identifier string, err error) 
 	}
 
 	// Check for ns
-	rematch := REVerifyDirectNs.FindSubmatch(buffer)
+	rematch := reVerifyDirectNs.FindSubmatch(buffer)
 	if rematch == nil {
 		return false, "", errors.New("VerifyValues: ns value not found on the response of the OP")
 	}
@@ -93,7 +93,7 @@ func VerifyValues(values url.Values) (grant bool, identifier string, err error) 
 	}
 
 	// Check for is_valid
-	match, err := regexp.Match(REVerifyDirectIsValid, buffer)
+	match, err := regexp.Match(reVerifyDirectIsValid, buffer)
 	if err != nil {
 		return false, "", err
 	}
