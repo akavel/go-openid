@@ -9,29 +9,29 @@ import (
 	"testing"
 )
 
-// NormalizeIdentifier Test
+// normalizeIdentifier Test
 
-type NormalizeIdentifierTest struct {
+type normalizeIdentifierTest struct {
 	in, out string
 	t       int
 }
 
-var NormalizeIdentifierTests = []NormalizeIdentifierTest{
-	//NormalizeIdentifierTest{"example.com", "http://example.com/", IdentifierURL},
-	//NormalizeIdentifierTest{"http://example.com", "http://example.com/", IdentifierURL},
-	NormalizeIdentifierTest{"https://example.com/", "https://example.com/", IdentifierURL},
-	NormalizeIdentifierTest{"http://example.com/user", "http://example.com/user", IdentifierURL},
-	NormalizeIdentifierTest{"http://example.com/user/", "http://example.com/user/", IdentifierURL},
-	NormalizeIdentifierTest{"http://example.com/", "http://example.com/", IdentifierURL},
-	NormalizeIdentifierTest{"=example", "=example", IdentifierXRI},
-	NormalizeIdentifierTest{"xri://=example", "=example", IdentifierXRI},
+var normalizeIdentifierTests = []normalizeIdentifierTest{
+	//normalizeIdentifierTest{"example.com", "http://example.com/", identifierURL},
+	//normalizeIdentifierTest{"http://example.com", "http://example.com/", identifierURL},
+	normalizeIdentifierTest{"https://example.com/", "https://example.com/", identifierURL},
+	normalizeIdentifierTest{"http://example.com/user", "http://example.com/user", identifierURL},
+	normalizeIdentifierTest{"http://example.com/user/", "http://example.com/user/", identifierURL},
+	normalizeIdentifierTest{"http://example.com/", "http://example.com/", identifierURL},
+	normalizeIdentifierTest{"=example", "=example", identifierXRI},
+	normalizeIdentifierTest{"xri://=example", "=example", identifierXRI},
 }
 
-func TestNormalizeIdentifier(testing *testing.T) {
-	for _, nit := range NormalizeIdentifierTests {
-		v, t := NormalizeIdentifier(nit.in)
+func TestnormalizeIdentifier(testing *testing.T) {
+	for _, nit := range normalizeIdentifierTests {
+		v, t := normalizeIdentifier(nit.in)
 		if !bytes.Equal([]byte(v), []byte(nit.out)) || t != nit.t {
-			testing.Errorf("NormalizeIdentifier(%s) = (%s, %d) want (%s, %d).", nit.in, v, t, nit.out, nit.t)
+			testing.Errorf("normalizeIdentifier(%s) = (%s, %d) want (%s, %d).", nit.in, v, t, nit.out, nit.t)
 		}
 	}
 }
