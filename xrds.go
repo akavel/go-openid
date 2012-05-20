@@ -41,17 +41,17 @@ func ParseXRDS(r io.Reader) (string, string) {
 
 	//fmt.Printf("%v\n", XRDSI)
 
-	if StringTableContains(XRDSI.Type, "http://specs.openid.net/auth/2.0/server") {
+	if stringTableContains(XRDSI.Type, "http://specs.openid.net/auth/2.0/server") {
 		//fmt.Printf("OP Identifier Element found\n")
 		return XRDSI.URI, ""
-	} else if StringTableContains(XRDSI.Type, "http://specs.openid.net/auth/2.0/signon") {
+	} else if stringTableContains(XRDSI.Type, "http://specs.openid.net/auth/2.0/signon") {
 		//fmt.Printf("Claimed Identifier Element found\n")
 		return XRDSI.URI, XRDSI.LocalID
 	}
 	return "", ""
 }
 
-func StringTableContains(t []string, s string) bool {
+func stringTableContains(t []string, s string) bool {
 	for _, v := range t {
 		if v == s {
 			return true
