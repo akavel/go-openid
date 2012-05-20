@@ -46,27 +46,24 @@ var reVerifyDirectNs = regexp.MustCompile("ns:([a-zA-Z0-9:/.]*)")
 
 // Like Verify on a parsed URL
 func VerifyValues(values url.Values) (grant bool, identifier string, err error) {
-	err = nil
-
-	var postArgs url.Values
-	postArgs = url.Values(map[string][]string{})
 
 	// Create the url
-	URLEndPoint := values.Get("openid.op_endpoint")
-	if URLEndPoint == "" {
+	urlEndPoint := values.Get("openid.op_endpoint")
+	if urlEndPoint == "" {
 		log.Printf("no openid.op_endpoint")
 		return false, "", errors.New("no openid.op_endpoint")
 	}
+
+	postArgs := url.Values(map[string][]string{})
 	for k, v := range values {
 		postArgs[k] = v
 	}
 	postArgs.Set("openid.mode", "check_authentication")
-	postContent := postArgs.Encode()
 
 	// Post the request
-	var client = new(http.Client)
-	postReader := bytes.NewBuffer([]byte(postContent))
-	response, err := client.Post(URLEndPoint, "application/x-www-form-urlencoded", postReader)
+	client := http.Client{}
+	postReader := bytes.NewBuffer([]byte(postArgs.Encode()))
+	response, err := client.Post(urlEndPoint, "application/x-www-form-urlencoded", postReader)
 	if err != nil {
 		log.Printf("VerifyValues failed at post")
 		return false, "", err
@@ -88,7 +85,7 @@ func VerifyValues(values url.Values) (grant bool, identifier string, err error) 
 		return false, "", errors.New("VerifyValues: ns value not found on the response of the OP")
 	}
 	nsValue := string(rematch[1])
-	if !bytes.Equal([]byte(nsValue), []byte("http://specs.openid.net/auth/2.0")) {
+	if nsValue != "http://specs.openid.net/auth/2.0" {
 		return false, "", errors.New("VerifyValues: ns value not correct: " + nsValue)
 	}
 
@@ -97,11 +94,10 @@ func VerifyValues(values url.Values) (grant bool, identifier string, err error) 
 	if err != nil {
 		return false, "", err
 	}
-
-	identifier = values.Get("openid.claimed_id")
 	if !match {
 		log.Printf("no is_valid:true in \"%s\"", buffer)
 	}
 
+	identifier = values.Get("openid.claimed_id")
 	return match, identifier, nil
 }
