@@ -5,7 +5,6 @@
 package openid
 
 import (
-	"bytes"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -26,7 +25,7 @@ func YadisVerbose(ID string, verbose *log.Logger) (io.Reader, error) {
 		return nil, err
 	}
 
-	var contentType = r.Header.Get("Content-Type")
+	contentType := r.Header.Get("Content-Type")
 
 	// If it is an XRDS document, return the Reader
 	if strings.HasPrefix(contentType, "application/xrds+xml") {
@@ -37,7 +36,7 @@ func YadisVerbose(ID string, verbose *log.Logger) (io.Reader, error) {
 	}
 
 	// If it is an HTML doc search for meta tags
-	if bytes.Equal([]byte(contentType), []byte("text/html")) {
+	if contentType == "text/html" {
 		url_, err := searchHTMLMetaXRDS(r.Body)
 		if err != nil {
 			return nil, err
@@ -49,7 +48,7 @@ func YadisVerbose(ID string, verbose *log.Logger) (io.Reader, error) {
 	}
 
 	// If the response contain an X-XRDS-Location header
-	var xrds_location = r.Header.Get("X-Xrds-Location")
+	xrds_location := r.Header.Get("X-Xrds-Location")
 	if len(xrds_location) > 0 {
 		if verbose != nil {
 			verbose.Printf("fetching xrds found in http header \"%s\"", xrds_location)

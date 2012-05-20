@@ -37,13 +37,18 @@ func GetRedirectURL(Identifier string, realm string, returnto string) (string, e
 	var err error
 	var Id, IdType = normalizeIdentifier(Identifier)
 
-	// If the identifier is an XRI, [XRI_Resolution_2.0] will yield an XRDS document that contains the necessary information. It should also be noted that Relying Parties can take advantage of XRI Proxy Resolvers, such as the one provided by XDI.org at http://www.xri.net. This will remove the need for the RPs to perform XRI Resolution locally.
+	// If the identifier is an XRI, [XRI_Resolution_2.0] will yield an XRDS document
+	// that contains the necessary information. It should also be noted that Relying
+	// Parties can take advantage of XRI Proxy Resolvers, such as the one provided by
+	// XDI.org at http://www.xri.net. This will remove the need for the RPs to perform
+	// XRI Resolution locally.
 	if IdType == identifierXRI {
 		// Not implemented yet
-		return "", errors.New("XRI identifier not implemented yed")
+		return "", errors.New("XRI identifier not implemented yet")
 	}
 
-	// If it is a URL, the Yadis protocol [Yadis] SHALL be first attempted. If it succeeds, the result is again an XRDS document.
+	// If it is a URL, the Yadis protocol [Yadis] SHALL be first attempted. If it succeeds,
+	// the result is again an XRDS document.
 	if IdType == identifierURL {
 		var reader io.Reader
 		reader, err = Yadis(Id)
@@ -59,14 +64,16 @@ func GetRedirectURL(Identifier string, realm string, returnto string) (string, e
 			return "", errors.New("Unable to parse the XRDS document")
 		}
 
-		// At this point we have the endpoint and eventually a claimed id		 
+		// At this point we have the endpoint and eventually a claimed id
 		// Create the authentication request
 		return CreateAuthenticationRequest(endpoint, claimedid, realm, returnto), nil
 	}
 
-	// If the Yadis protocol fails and no valid XRDS document is retrieved, or no Service Elements are found in the XRDS document, the URL is retrieved and HTML-Based discovery SHALL be attempted.
+	// If the Yadis protocol fails and no valid XRDS document is retrieved, or
+	// no Service Elements are found in the XRDS document, the URL is retrieved
+	// and HTML-Based discovery SHALL be attempted.
 
-	return "Not implemented", nil
+	return "", errors.New("Non-Yadis identifiers not implemented yet")
 }
 
 func normalizeIdentifier(id string) (identifier string, identifierType int) {
