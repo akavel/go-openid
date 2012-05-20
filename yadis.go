@@ -15,11 +15,53 @@ import (
 	"strings"
 )
 
-func Yadis(id string) (io.Reader, error) {
-	return YadisVerbose(id, nil)
+func Discover(identifier string) (*Query, error) {
+	id, idType := normalizeIdentifier(identifier)
+
+	// If the identifier is an XRI, [XRI_Resolution_2.0] will yield an XRDS document
+	// that contains the necessary information. It should also be noted that Relying
+	// Parties can take advantage of XRI Proxy Resolvers, such as the one provided by
+	// XDI.org at http://www.xri.net. This will remove the need for the RPs to perform
+	// XRI Resolution locally.
+	if idType == identifierXRI {
+		// Not implemented yet
+		return nil, errors.New("XRI identifier not implemented yet")
+	}
+
+	// If it is a URL, the Yadis protocol [Yadis] SHALL be first attempted. If it succeeds,
+	// the result is again an XRDS document.
+	if idType == identifierURL {
+		reader, err := yadisDial(id)
+		if err != nil {
+			return nil, err
+		}
+		if reader == nil {
+			return nil, errors.New("Yadis returned an empty Reader for the ID: " + id)
+		}
+
+		endpoint, claimedid, err := ParseXRDS(reader)
+		if len(endpoint) == 0 {
+			return nil, errors.New("Unable to parse the XRDS document: " + err.Error())
+		}
+		return &Query{
+			ClaimedID:     claimedid,
+			OPEndpointURL: endpoint,
+		}, nil
+	}
+
+	// If the Yadis protocol fails and no valid XRDS document is retrieved, or
+	// no Service Elements are found in the XRDS document, the URL is retrieved
+	// and HTML-Based discovery SHALL be attempted.
+
+	return nil, errors.New("Non-Yadis identifiers not implemented yet")
+
 }
 
-func YadisVerbose(id string, verbose *log.Logger) (io.Reader, error) {
+func yadisDial(id string) (io.Reader, error) {
+	return yadisDialVerbose(id, nil)
+}
+
+func yadisDialVerbose(id string, verbose *log.Logger) (io.Reader, error) {
 	for i := 0; i < 5; i++ {
 		r, err := YadisRequest(id)
 		if err != nil || r == nil {

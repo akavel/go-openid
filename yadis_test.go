@@ -63,7 +63,7 @@ var YadisTests = []YadisTest{
 func TestYadis(t *testing.T) {
 	logger := log.New(os.Stdout, "TestYadis ", log.Ltime|log.Lmicroseconds|log.Lshortfile)
 	for _, yt := range YadisTests {
-		var reader, err = YadisVerbose(yt.url, logger)
+		var reader, err = yadisDialVerbose(yt.url, logger)
 		if err != nil {
 			t.Errorf("Yadis(%s) returned a error: %s", yt.url, err.Error())
 			continue

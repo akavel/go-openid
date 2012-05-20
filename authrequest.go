@@ -32,10 +32,14 @@ id, err := {ClaimedID, OPEndpointURL}.Verify(receivedURLValues)
 */
 
 import (
-	"errors"
 	"net/url"
 	"strings"
 )
+
+type Query struct {
+	ClaimedID     string
+	OPEndpointURL string
+}
 
 const (
 	identifierXRI = iota
@@ -43,44 +47,14 @@ const (
 )
 
 func GetRedirectURL(identifier string, realm string, returnto string) (string, error) {
-	id, idType := normalizeIdentifier(identifier)
-
-	// If the identifier is an XRI, [XRI_Resolution_2.0] will yield an XRDS document
-	// that contains the necessary information. It should also be noted that Relying
-	// Parties can take advantage of XRI Proxy Resolvers, such as the one provided by
-	// XDI.org at http://www.xri.net. This will remove the need for the RPs to perform
-	// XRI Resolution locally.
-	if idType == identifierXRI {
-		// Not implemented yet
-		return "", errors.New("XRI identifier not implemented yet")
+	query, err := Discover(identifier)
+	if err != nil {
+		return "", err
 	}
 
-	// If it is a URL, the Yadis protocol [Yadis] SHALL be first attempted. If it succeeds,
-	// the result is again an XRDS document.
-	if idType == identifierURL {
-		reader, err := Yadis(id)
-		if err != nil {
-			return "", err
-		}
-		if reader == nil {
-			return "", errors.New("Yadis returned an empty Reader for the ID: " + id)
-		}
-
-		endpoint, claimedid, err := ParseXRDS(reader)
-		if len(endpoint) == 0 {
-			return "", errors.New("Unable to parse the XRDS document: " + err.Error())
-		}
-
-		// At this point we have the endpoint and eventually a claimed id
-		// Create the authentication request
-		return CreateAuthenticationRequest(endpoint, claimedid, realm, returnto), nil
-	}
-
-	// If the Yadis protocol fails and no valid XRDS document is retrieved, or
-	// no Service Elements are found in the XRDS document, the URL is retrieved
-	// and HTML-Based discovery SHALL be attempted.
-
-	return "", errors.New("Non-Yadis identifiers not implemented yet")
+	// At this point we have the endpoint and eventually a claimed id
+	// Create the authentication request
+	return CreateAuthenticationRequest(query.OPEndpointURL, query.ClaimedID, realm, returnto), nil
 }
 
 func normalizeIdentifier(id string) (identifier string, identifierType int) {

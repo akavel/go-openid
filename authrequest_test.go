@@ -49,7 +49,7 @@ func TestGetRedirectURL(t *testing.T) {
 	for _, url := range Identifiers {
 		_, err := GetRedirectURL(url, "http://example.com", "/loginCheck")
 		if err != nil {
-			t.Errorf("GetRedirectURL() returned the error: %s", err.Error())
+			t.Errorf("GetRedirectURL() returned the error: %s\n", err.Error())
 		}
 	}
 }
