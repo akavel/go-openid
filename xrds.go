@@ -10,19 +10,19 @@ import (
 	"strings"
 )
 
-type XRDSIdentifier struct {
+type xrdsIdentifier struct {
 	XMLName xml.Name "Service"
 	Type    []string
 	URI     string
 	LocalID string
 }
-type XRD struct {
+type xrd struct {
 	XMLName xml.Name "XRD"
-	Service XRDSIdentifier
+	Service xrdsIdentifier
 }
 type xrds struct {
 	XMLName xml.Name "XRDS"
-	XRD     XRD
+	XRD     xrd
 }
 
 // Parse a XRDS document provided through a io.Reader
