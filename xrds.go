@@ -12,10 +12,11 @@ import (
 )
 
 type xrdsIdentifier struct {
-	XMLName xml.Name "Service"
-	Type    []string
-	URI     string
-	LocalID string
+	XMLName  xml.Name "Service"
+	Type     []string
+	URI      string
+	LocalID  string
+	Delegate string // for OpenID 1.x
 }
 type xrd struct {
 	XMLName xml.Name "XRD"
@@ -28,9 +29,9 @@ type xrds struct {
 
 // Parse a XRDS document provided through a io.Reader
 // Return the OP EndPoint and, if found, the Claimed Identifier
-func ParseXRDS(r io.Reader) (string, string, error) {
+func ParseXRDS(r io.Reader) (OPEndpointURL string, OPLocalIdentifier string, err error) {
 	xrds := xrds{}
-	err := xml.NewDecoder(r).Decode(&xrds)
+	err = xml.NewDecoder(r).Decode(&xrds)
 	if err != nil {
 		return "", "", err
 	}
@@ -47,6 +48,8 @@ func ParseXRDS(r io.Reader) (string, string, error) {
 	} else if stringTableContains(xrdsi.Type, "http://specs.openid.net/auth/2.0/signon") {
 		//fmt.Printf("Claimed Identifier Element found\n")
 		return xrdsi.URI, xrdsi.LocalID, nil
+	} else if stringTableContains(xrdsi.Type, "http://openid.net/signon/1.1") || stringTableContains(xrdsi.Type, "http://openid.net/signon/1.0") {
+		return xrdsi.URI, xrdsi.Delegate, nil
 	}
 	return "", "", errors.New("No supported Identifier Elements in Service Types list")
 }

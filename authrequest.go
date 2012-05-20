@@ -3,6 +3,10 @@
 // license that can be found in the LICENSE file.
 
 /*
+Package openid implements parts of the OpenID 2.0 standard.
+For more information, see: http://openid.net/specs/openid-authentication-2_0.html
+
+
 Usage:
 
 	url := openid.GetRedirectURL("Identifier", "http://www.realm.com", "/loginCheck")
