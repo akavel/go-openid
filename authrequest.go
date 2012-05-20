@@ -33,30 +33,30 @@ const (
 	identifierURL
 )
 
-func GetRedirectURL(Identifier string, realm string, returnto string) (string, error) {
+func GetRedirectURL(identifier string, realm string, returnto string) (string, error) {
 	var err error
-	var Id, IdType = normalizeIdentifier(Identifier)
+	var id, idType = normalizeIdentifier(identifier)
 
 	// If the identifier is an XRI, [XRI_Resolution_2.0] will yield an XRDS document
 	// that contains the necessary information. It should also be noted that Relying
 	// Parties can take advantage of XRI Proxy Resolvers, such as the one provided by
 	// XDI.org at http://www.xri.net. This will remove the need for the RPs to perform
 	// XRI Resolution locally.
-	if IdType == identifierXRI {
+	if idType == identifierXRI {
 		// Not implemented yet
 		return "", errors.New("XRI identifier not implemented yet")
 	}
 
 	// If it is a URL, the Yadis protocol [Yadis] SHALL be first attempted. If it succeeds,
 	// the result is again an XRDS document.
-	if IdType == identifierURL {
+	if idType == identifierURL {
 		var reader io.Reader
-		reader, err = Yadis(Id)
+		reader, err = Yadis(id)
 		if err != nil {
 			return "", err
 		}
 		if reader == nil {
-			return "", errors.New("Yadis returned an empty Reader for the ID: " + Id)
+			return "", errors.New("Yadis returned an empty Reader for the ID: " + id)
 		}
 
 		var endpoint, claimedid = ParseXRDS(reader)
