@@ -2,6 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/*
+Usage:
+
+	url := openid.GetRedirectURL("Identifier", "http://www.realm.com", "/loginCheck")
+
+Now you have to redirect the user to the url returned. The OP will then
+forward the user back to you, after authenticating him.
+
+To check the identity, do that:
+
+	grant, id, err := openid.Verify(URL)
+
+URL is the url the user was redirected to.  grant will be true if the
+user was correctly authenticated, false otherwise.  If the user was
+authenticated, id contains its identifier.
+
+*/
 package openid
 
 import (
