@@ -9,18 +9,23 @@ For more information, see: http://openid.net/specs/openid-authentication-2_0.htm
 
 Usage:
 
-	url := openid.GetRedirectURL("Identifier", "http://www.realm.com", "/loginCheck")
+	query, err := openid.Discover("http://johnsmith.myopenid.com")
+	if err != nil {
+		panic(err)
+	}
+	url := query.CreateAuthenticationRequest("http://www.sesame.com", "/loginVerifier")
 
-Now you have to redirect the user to the url returned. The OP will then
-forward the user back to you, after authenticating him.
+Now you have to redirect the user to the url returned. The OP (OpenID Provider) will then
+forward the user back to you (i.e. in example to: "http://www.sesame.com/loginVerifier"),
+after authenticating him.
 
-To check the identity, do that:
+To check the user's identity afterwards, run:
 
 	grant, id, err := openid.Verify(URL)
 
-URL is the url the user was redirected to.  grant will be true if the
-user was correctly authenticated, false otherwise.  If the user was
-authenticated, id contains its identifier.
+URL is the url the user was redirected to, with the full query string.
+The grant variable will be true if the user was correctly authenticated,
+false otherwise.  If the user was authenticated, id contains his identifier.
 
 */
 package openid
