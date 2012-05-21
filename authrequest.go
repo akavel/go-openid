@@ -63,7 +63,7 @@ func GetRedirectURL(identifier string, realm string, returnto string) (string, e
 
 	// At this point we have the endpoint and eventually a claimed id
 	// Create the authentication request
-	return CreateAuthenticationRequest(query.OPEndpointURL, query.ClaimedID, realm, returnto), nil
+	return query.CreateAuthenticationRequest(realm, returnto), nil
 }
 
 func normalizeIdentifier(id string) (identifier string, identifierType int) {
@@ -103,30 +103,26 @@ func normalizeIdentifier(id string) (identifier string, identifierType int) {
 	return
 }
 
-func CreateAuthenticationRequest(OPEndPoint, ClaimedID, Realm, ReturnTo string) string {
-	if ClaimedID == "" {
-		ClaimedID = "http://specs.openid.net/auth/2.0/identifier_select"
+func (q Query) CreateAuthenticationRequest(Realm, ReturnTo string) string {
+	claimedID := q.ClaimedID
+	if claimedID == "" {
+		claimedID = "http://specs.openid.net/auth/2.0/identifier_select"
 	}
-	p := map[string]string{
-		"openid.ns":         "http://specs.openid.net/auth/2.0",
-		"openid.mode":       "checkid_setup",
-		"openid.return_to":  Realm + ReturnTo,
-		"openid.realm":      Realm,
-		"openid.claimed_id": ClaimedID,
-		"openid.identity":   ClaimedID,
+	p := map[string][]string{
+		"openid.ns":         []string{"http://specs.openid.net/auth/2.0"},
+		"openid.mode":       []string{"checkid_setup"},
+		"openid.return_to":  []string{Realm + ReturnTo},
+		"openid.realm":      []string{Realm},
+		"openid.claimed_id": []string{claimedID},
+		"openid.identity":   []string{claimedID},
 	}
 
-	var url_ string
-	if strings.Index(OPEndPoint, "?") == -1 {
-		url_ = OPEndPoint + "?"
+	url_ := q.OPEndpointURL
+	if strings.Index(url_, "?") == -1 {
+		url_ = url_ + "?"
 	} else {
-		url_ = OPEndPoint + "&"
+		url_ = url_ + "&"
 	}
 
-	var params []string
-	for k, v := range p {
-		params = append(params, url.QueryEscape(k)+"="+url.QueryEscape(v))
-	}
-
-	return url_ + strings.Join(params, "&")
+	return url_ + url.Values(p).Encode()
 }
